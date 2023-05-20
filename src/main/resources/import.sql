@@ -1,0 +1,1 @@
+insert into "Officer" (officerId,name,location,password) values(1,'Astrodux','NY','demo');

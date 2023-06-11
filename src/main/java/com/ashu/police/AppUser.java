@@ -30,6 +30,7 @@ public class AppUser {
 	private String email;
 
 	@Size(min = 8, message = "Minimum password length: 8 characters")
+	@Column
 	private String password;
 
 	@ElementCollection(fetch = FetchType.EAGER)

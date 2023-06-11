@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
@@ -25,27 +26,35 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtTokenProvider jwtTokenProvider;
 
+	@Autowired
 	private final AuthenticationManager authenticationManager;
 
 	public String signin(String username, String password) {
 		try {
-			System.out.println("username="+username+" ,password = "+password);
-			if(username.equals("Astrodux")&&password.equals("Demo")) {
+			System.out.println("username=" + username + " ,password = " + password);
+			if (username.equals("Astrodux") && password.equals("Demo")) {
 				System.out.println("username password received");
-				List<AppUserRole> appUserRoles=new ArrayList<AppUserRole>();
+				List<AppUserRole> appUserRoles = new ArrayList<AppUserRole>();
 				appUserRoles.add(AppUserRole.ROLE_OFFICER);
 				return jwtTokenProvider.createToken(username, appUserRoles);
 			}
-			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-			return jwtTokenProvider.createToken(username, userRepository.findByUsername(username).getAppUserRoles());
-		} catch (AuthenticationException e) {
+			AppUser user = userRepository.findByUsername(username);
+//			String encodedPassword=passwordEncoder.encode(password);
+			System.out.println("saved password = " + user.getPassword() + " provided password = " + password);
+			if (user != null && user.getPassword().equals(password)) {
+				return jwtTokenProvider.createToken(username, user.getAppUserRoles());
+			} else {
+				throw new Exception();
+			}
+
+		} catch (Exception e) {
 			throw new CustomException("Invalid username/password supplied", HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 	}
 
 	public String signup(AppUser appUser) {
 		if (!userRepository.existsByUsername(appUser.getUsername())) {
-			appUser.setPassword(passwordEncoder.encode(appUser.getPassword()));
+//			appUser.setPassword(passwordEncoder.encode(appUser.getPassword()));
 			userRepository.save(appUser);
 			return jwtTokenProvider.createToken(appUser.getUsername(), appUser.getAppUserRoles());
 		} else {

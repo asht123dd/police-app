@@ -26,4 +26,8 @@ public class PoliceService {
 	public void saveOrUpdate(Complaints complaint) {
 		complaintsRepository.save(complaint);
 	}
+
+	public Complaints getComplaintById(long complaintId) {
+			return complaintsRepository.findById(complaintId).orElse(new Complaints());
+	}
 }

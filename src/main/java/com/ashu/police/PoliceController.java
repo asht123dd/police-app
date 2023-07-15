@@ -38,4 +38,9 @@ public class PoliceController {
 		policeService.saveOrUpdate(complaint);
 		return new ResponseEntity<Complaints>(complaint,HttpStatus.CREATED);
 	}
+
+	@GetMapping("/complaints/{complaintId}")
+	public ResponseEntity<Complaints> getComplaintByComplaintId(@PathVariable long complaintId) {		
+		return new ResponseEntity<Complaints>(policeService.getComplaintById(complaintId), HttpStatus.OK);
+	}
 }

@@ -40,7 +40,15 @@ public class PoliceController {
 	}
 
 	@GetMapping("/complaints/{complaintId}")
-	public ResponseEntity<Complaints> getComplaintByComplaintId(@PathVariable long complaintId) {		
-		return new ResponseEntity<Complaints>(policeService.getComplaintById(complaintId), HttpStatus.OK);
+	public ResponseEntity<?> getComplaintByComplaintId(@PathVariable long complaintId, Principal principal) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		boolean hasUserRole = authentication.getAuthorities().stream()
+				.anyMatch(r -> r.getAuthority().equals("ROLE_OFFICER"));
+		if (hasUserRole) {
+			return new ResponseEntity<Complaints>(policeService.getComplaintById(complaintId), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<String>("Unauthorized", HttpStatus.UNAUTHORIZED);
+		}
 	}
 }

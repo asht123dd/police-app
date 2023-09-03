@@ -3,6 +3,9 @@ package com.ashu.police;
 import javax.servlet.http.HttpServletRequest;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,10 +25,14 @@ public class UserController {
 	private final ModelMapper modelMapper;
 
 	@PostMapping("/signin")
-	public String login(//
+	public ResponseEntity<?> login(//
 			@RequestParam String username, //
 			@RequestParam String password) {
-		return userService.signin(username, password);
+		try {
+			return new ResponseEntity<String>(userService.signin(username, password), HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<String>("", HttpStatus.UNAUTHORIZED);
+		}
 	}
 
 	@PostMapping("/signup")

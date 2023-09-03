@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,6 +49,8 @@ public class PoliceController {
 
 	@GetMapping("/complaints/{complaintId}")
 	public ResponseEntity<?> getComplaintByComplaintId(@PathVariable long complaintId, Principal principal) {
+//		complaint.setStatus("FILED");
+//		policeService.getComplaintById(complaintId);
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
 		boolean hasUserRole = authentication.getAuthorities().stream()
@@ -63,6 +66,23 @@ public class PoliceController {
 			} else {
 				return new ResponseEntity<String>("Unauthorized", HttpStatus.UNAUTHORIZED);
 			}
+		}
+	}
+
+	@PutMapping("/complaints/{complaintId}")
+	public ResponseEntity<?> updateComplaintByComplaintId(@PathVariable long complaintId,
+			@RequestBody Complaints complaint) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		boolean hasOfficerRole = authentication.getAuthorities().stream()
+				.anyMatch(r -> r.getAuthority().equals("ROLE_OFFICER"));
+		System.out.println(authentication.getName());
+		if (hasOfficerRole) {
+			Complaints complaintInDB = policeService.getComplaintById(complaintId);
+			complaintInDB.setStatus(complaint.getStatus());
+			policeService.saveOrUpdate(complaintInDB);
+			return new ResponseEntity<Complaints>(complaintInDB, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<String>("Unauthorized", HttpStatus.UNAUTHORIZED);
 		}
 	}
 }
